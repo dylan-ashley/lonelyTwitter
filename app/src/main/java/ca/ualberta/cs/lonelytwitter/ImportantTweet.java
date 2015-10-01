@@ -24,5 +24,4 @@ public class ImportantTweet extends Tweet {
     public String getText() {
         return "!!!" + super.getText();
     }
-
 }

@@ -89,7 +89,7 @@ public class LonelyTwitterActivity extends Activity {
             // TODO Auto-generated catch block
         }
     }
-    
+
     private void saveInFile() {
         try {
             FileOutputStream fos = openFileOutput(FILENAME, Context.MODE_PRIVATE);
