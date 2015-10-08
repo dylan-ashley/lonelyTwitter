@@ -1,6 +1,7 @@
 package ca.ualberta.cs.lonelytwitter;
 
 import android.test.ActivityInstrumentationTestCase2;
+import android.text.BoringLayout;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -10,7 +11,13 @@ import static java.util.Collections.sort;
 /**
  * Created by dashley on 2015-09-30.
  */
-public class TweetListTest extends ActivityInstrumentationTestCase2 {
+public class TweetListTest extends ActivityInstrumentationTestCase2 implements  MyObserver {
+
+    private boolean wasNotified;
+
+    public void myNotify() {
+        wasNotified = true;
+    }
 
     public TweetListTest() {
         super(LonelyTwitterActivity.class);
@@ -68,5 +75,14 @@ public class TweetListTest extends ActivityInstrumentationTestCase2 {
         tweetList.addTweet(tweet1);
         ArrayList<Tweet> returnedTweets = tweetList.getTweets();
         assertEquals(orderedTweets, returnedTweets);
+    }
+
+    public void testTweetListChanged() {
+        TweetList tweetList = new TweetList();
+        Tweet tweet = new NormalTweet("hihihihi");
+        tweetList.addObserver(this);
+        wasNotified = false;
+        tweetList.addTweet(tweet);
+        assertTrue(wasNotified);
     }
 }
