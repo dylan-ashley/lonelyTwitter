@@ -49,7 +49,7 @@ public class LonelyTwitterActivity extends Activity {  // view/controller
                 String text = bodyText.getText().toString();  // controller
                 tweets.add(new NormalTweet(text));  // model
                 saveInFile();  // model
-                adapter.notifyDataSetChanged();  // view
+                adapter.notifyDataSetChanged();  // controller
                 bodyText.setText("");  // view
             }
         });
@@ -60,7 +60,7 @@ public class LonelyTwitterActivity extends Activity {  // view/controller
                 setResult(RESULT_OK);  // model
                 tweets.clear();  // model
                 saveInFile();  // model
-                adapter.notifyDataSetChanged();  // view
+                adapter.notifyDataSetChanged();  // controller
                 bodyText.setText("");  // view
             }
         });
@@ -72,7 +72,7 @@ public class LonelyTwitterActivity extends Activity {  // view/controller
         loadFromFile();  // model
         adapter = new ArrayAdapter<Tweet>(this, R.layout.list_item, tweets);  // model
         oldTweetsList.setAdapter(adapter);  // model
-        adapter.notifyDataSetChanged();  // view
+        adapter.notifyDataSetChanged();  // controller
     }
 
     private void loadFromFile() {  // model
