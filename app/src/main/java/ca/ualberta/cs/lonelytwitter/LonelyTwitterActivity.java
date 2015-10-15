@@ -13,8 +13,10 @@ import java.util.ArrayList;  // model
 
 import android.app.Activity;  // model
 import android.content.Context;  // model
+import android.content.Intent;
 import android.os.Bundle;  // model
 import android.view.View;  // model
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;  // model
 import android.widget.Button;  // model
 import android.widget.EditText;  // model
@@ -27,9 +29,12 @@ public class LonelyTwitterActivity extends Activity {  // view/controller
 
     private static final String FILENAME = "file.sav"; // model
     private EditText bodyText; // view/controller
-    private ArrayList<Tweet> tweets = new ArrayList<Tweet>(); // model
+    private TweetList tweets = new TweetList(); // model
     private ListView oldTweetsList;  // view
     private ArrayAdapter<Tweet> adapter;  // controller
+    private Button saveButton;
+    private Button clearButton;
+    private Activity activity;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {  // controller
@@ -38,8 +43,8 @@ public class LonelyTwitterActivity extends Activity {  // view/controller
         setContentView(R.layout.main);  // view
 
         bodyText = (EditText) findViewById(R.id.body);  // view/controller
-        Button saveButton = (Button) findViewById(R.id.save);  // view/controller
-        Button clearButton = (Button) findViewById(R.id.clear);  // view/controller
+        saveButton = (Button) findViewById(R.id.save);  // view/controller
+        clearButton = (Button) findViewById(R.id.clear);  // view/controller
         oldTweetsList = (ListView) findViewById(R.id.oldTweetsList);  // view
 
         saveButton.setOnClickListener(new View.OnClickListener() {  // controller
@@ -47,7 +52,7 @@ public class LonelyTwitterActivity extends Activity {  // view/controller
             public void onClick(View v) {  // controller
                 setResult(RESULT_OK);  // model
                 String text = bodyText.getText().toString();  // controller
-                tweets.add(new NormalTweet(text));  // model
+                tweets.addTweet(new NormalTweet(text));  // model
                 saveInFile();  // model
                 adapter.notifyDataSetChanged();  // controller
                 bodyText.setText("");  // view
@@ -64,13 +69,21 @@ public class LonelyTwitterActivity extends Activity {  // view/controller
                 bodyText.setText("");  // view
             }
         });
+
+        activity = this;
+        oldTweetsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(activity, EditTweetActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
     protected void onStart() {  // controller
         super.onStart();  // controller
         loadFromFile();  // model
-        adapter = new ArrayAdapter<Tweet>(this, R.layout.list_item, tweets);  // model
+        adapter = new ArrayAdapter<Tweet>(this, R.layout.list_item, tweets.getTweets());  // model
         oldTweetsList.setAdapter(adapter);  // model
         adapter.notifyDataSetChanged();  // controller
     }
@@ -82,9 +95,13 @@ public class LonelyTwitterActivity extends Activity {  // view/controller
             Gson gson = new Gson();  // model
             // https://google-gson.googlecode.com/svn/trunk/gson/docs/javadocs/com/google/gson/Gson.html; 2015-09-23
             Type arrayListType = new TypeToken<ArrayList<NormalTweet>>() {}.getType();  // model
-            tweets = gson.fromJson(in, arrayListType);  // model
+            ArrayList<NormalTweet> tweetArrayList = gson.fromJson(in, arrayListType);  // model
+            tweets = new TweetList();
+            for (Tweet tweet: tweetArrayList) {
+                tweets.addTweet(tweet);
+            }
         } catch (FileNotFoundException e) {  // controller
-            throw new RuntimeException(e);  // model
+            tweets = new TweetList();  // model
         }
     }
 
@@ -93,7 +110,7 @@ public class LonelyTwitterActivity extends Activity {  // view/controller
             FileOutputStream fos = openFileOutput(FILENAME, Context.MODE_PRIVATE);  // model
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fos));  // model
             Gson gson = new Gson();  // model
-            gson.toJson(tweets, out);  // model
+            gson.toJson(tweets.getTweets(), out);  // model
             out.flush();  // model
             fos.close();  // model
         } catch (FileNotFoundException e) {  // controller
@@ -101,5 +118,25 @@ public class LonelyTwitterActivity extends Activity {  // view/controller
         } catch (IOException e) {  // controller
             throw new RuntimeException(e);  // view
         }
+    }
+
+    public TweetList getTweetList() {
+        return tweets;
+    }
+
+    public EditText getBodyText() {
+        return bodyText;
+    }
+
+    public Button getClearButton() {
+        return clearButton;
+    }
+
+    public Button getSaveButton() {
+        return saveButton;
+    }
+
+    public ListView getOldTweetsList() {
+        return oldTweetsList;
     }
 }
